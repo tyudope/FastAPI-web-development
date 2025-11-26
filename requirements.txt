@@ -1,0 +1,7 @@
+black
+pytest
+fastapi
+uvicorn
+httpie
+requests
+httpx
