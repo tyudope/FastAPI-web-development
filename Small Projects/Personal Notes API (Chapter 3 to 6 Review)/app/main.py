@@ -13,11 +13,16 @@ class Note(BaseModel):
     id:int
     title: str = Field(..., min_length = 2, max_length=10)
     content: str= Field(..., min_length = 2, max_length=148)
-    tags : list[str] = Field(min_length = 1, max_length=5)
+    tags : list[str] = Field(..., min_length = 1, max_length=5)
     created_at : datetime
     updated_at : datetime = Field(default_factory=datetime.now)
 
-
+# Add an input model: NoteIn
+# we define a simple model for the request body:
+class NoteIn(BaseModel):
+    title : str = Field(..., min_length= 2, max_length=10)
+    content: str = Field(..., min_length= 2, max_length=148)
+    tags : list[str]  = Field(..., min_length=1, max_length=5)
 
 
 
@@ -39,14 +44,19 @@ app = FastAPI()
 
 
 # STEP 3.
-# Create
 # CRUD (CREATE (POST) , Read (GET), UPDATE (PUT) , DELETE (DELETE))
+
+# Read all notes
+@app.get("/notes")
+async def read_all_notes():
+    await asyncio.sleep(0.5)
+    return notes
 
 # Read notes by given user_id and given tags.
 # You CANNOT have two endpoints with the same path.
 @app.get("/notes/{user_id}")
-def read_jokes_tag(user_id :int, tag: Optional[str] = None):
-
+async def read_notes_tag(user_id :int, tag: Optional[str] = None):
+    await asyncio.sleep(0.1)
     read_notes = []
     for note in notes:
         if note.id == user_id:
@@ -65,4 +75,29 @@ def read_jokes_tag(user_id :int, tag: Optional[str] = None):
 
     return read_notes
 
+
+
+# Create a new Note
+@app.post("/notes", response_model = Note)
+async def create_note(note_in : NoteIn) -> Note:
+
+    # Generate new id, if id is not exist start from 1, if there are notes, find the last node (max id) and plus 1
+    new_id = max([note.id for note in notes]) + 1
+
+    # Create time stamps
+    now = datetime.now()
+
+    # Build note object from NoteIn
+    new_note = Note(
+        id = new_id,
+        title = note_in.title,
+        content = note_in.content,
+        tags = note_in.tags,
+        created_at=now
+    )
+
+
+    notes.append(new_note)
+    await asyncio.sleep(0.1)
+    return new_note
 
