@@ -95,9 +95,41 @@ async def create_note(note_in : NoteIn) -> Note:
         tags = note_in.tags,
         created_at=now
     )
-
-
     notes.append(new_note)
     await asyncio.sleep(0.1)
     return new_note
 
+
+# Delete note
+@app.delete("/delete/{note_id}")
+async def delete_note(note_id : int):
+    for index, note in enumerate(notes):
+        if note.id == note_id:
+            return notes.pop(index)
+
+    raise HTTPException(status_code = 404,detail = "Provided note_id is not appear in the database")
+
+
+
+# Update note by id
+@app.put("/notes/{note_id}", response_model = Note)
+async def update_note(note_id : int, note_in : NoteIn) -> Note:
+    # Simulate DB Latency
+    await asyncio.sleep(0.4)
+
+    for index, note in enumerate(notes):
+        if note_id == note.id:
+            now = datetime.now()
+
+            updated_note = Note(
+                id = note.id,
+                title = note_in.title,
+                content = note_in.content,
+                tags = note_in.tags,
+                created_at=note.created_at,
+                updated_at=now
+            )
+            notes[index] = updated_note
+            return updated_note
+
+    raise HTTPException(status_code=404, detail=f"No note found with id {note_id}")
