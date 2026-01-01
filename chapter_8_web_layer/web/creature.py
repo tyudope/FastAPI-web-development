@@ -10,6 +10,7 @@ def get_all() -> list[Creature]:
     return service.get_all()
 
 @router.get("/{name}")
+
 def get_one(name) -> Optional[Creature]:
     return service.get_one(name)
 
