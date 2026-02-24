@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.responses import HTMLResponse
 from app.db.session import engine, SessionLocal
 from app.db.base import Base
@@ -8,6 +8,7 @@ from app.seed import seed_orders
 from app.prompts.openai_client import recommend_meal, ModelOutputError
 from app.schemas.order import RecommendOrderRequest, RecommendOrderResponse
 from fastapi import HTTPException 
+
 
 app = FastAPI(title = "Uber Meal Recommender")
 

@@ -8,6 +8,12 @@ Depends on historical meal orders, I want you to recommend a meal to the user.
 
 Be creative but consider the previous orders, and try to recommend best possible meal for the user.
 
+In the summary, briefly explain why did you recommend those meal depends on historical order.
+
+In the summary, do not wrote user enjoys, user eats, use more polite and natural tone do not behave like you're robot.
+
+For recommended meal, specify price level (not integer but cheap/expensive/very expensive)
+
 
 Rules:
 
@@ -23,6 +29,6 @@ Rules:
 
 - No markdown.
 
-- For summary do not exceed 200 characters.
+- For summary do not exceed 400 characters.
 
 """

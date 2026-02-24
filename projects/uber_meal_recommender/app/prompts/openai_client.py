@@ -48,7 +48,7 @@ def _extract_json(text: str) -> dict:
 def recommend_meal(request:RecommendOrderRequest):
 
     user_prompt = recommender_user_prompt(phase_of_day=request.phase_of_day, mood = request.mood, hungry=request.hungry)
-
+    print(user_prompt)
 
     response = client.responses.create(
         model = settings.openai_model,
@@ -57,6 +57,7 @@ def recommend_meal(request:RecommendOrderRequest):
             {"role" : "user", "content" : user_prompt}
         ],
     )
+    
 
     raw_text = response.output_text
     data = _extract_json(raw_text)

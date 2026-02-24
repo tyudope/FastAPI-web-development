@@ -17,6 +17,9 @@ SessionLocal = sessionmaker(bind = engine, autoflush=False, autocommit= False)
 
 
 def get_db():
+    """
+    FastAPI Dependency Injection
+    """
     db = SessionLocal()
     try:
         yield db

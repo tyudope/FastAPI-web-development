@@ -26,6 +26,8 @@ class RecommendOrderRequest(StrictModel):
 
     hungry: int = Field(..., ge=1, le = 5, description = "User's current hungry level.")
 
+    previous_orders : List = Field(default_factory=list, description="User's previous orders")
+
 
 
 
