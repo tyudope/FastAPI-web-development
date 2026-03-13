@@ -9,4 +9,5 @@ Review
 # Environment variables
 .env
 .env.*
-.db
+*.db
+
