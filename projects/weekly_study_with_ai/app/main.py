@@ -5,9 +5,9 @@ from app.models import Base
 
 
 
-from app.routers.goal import router as goal_router # Add Goal Router
-
-
+from app.routers.goal import router as goal_router 
+from app.routers.routine import router as routine_router 
+from app.routers.task import router as task_router
 
 
 app = FastAPI(title = "Study with AI")
@@ -25,3 +25,5 @@ def on_startup():
 
 
 app.include_router(goal_router)
+app.include_router(routine_router)
+app.include_router(task_router)
