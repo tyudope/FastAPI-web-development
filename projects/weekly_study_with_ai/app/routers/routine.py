@@ -3,31 +3,65 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from app.db.session import get_db
-from app.models import Goal, Routine
-from app.schemas import RoutineCreate, RoutineOut
+from app.models import Routine, Task
+from app.schemas import RoutineOut, TaskCreate, TaskOut
 
 
-router = APIRouter(prefix = "/goals", tags = ["Routines"]) # This means all routes inside will start with: /goals
+router = APIRouter(prefix = "/routines", tags = ["Routines"]) # This means all routes inside will start with: /routines
 
-@router.post("/{goal_id}/routine", response_model=RoutineOut)
-def create_routine_for_goal(goal_id:int, routine:RoutineCreate, db:Session = Depends(get_db)):
-
-    # Check if the goal exists
-    goal = db.scalar(select(Goal).where(Goal.id == goal_id))
-    if goal is None:
-        raise HTTPException(status_code= 404, detail = "Goal not found.")
-
-    # Check if this goal already has a routine (one-to-one rule)
-    existing_routine = db.scalar(select(Routine).where(Routine.goal_id == goal_id))
-    if existing_routine is not None:
-        raise HTTPException(status_code=400, detail = "The goal already has a routine.")
+# Get all routines
+@router.get("" , response_model = list[RoutineOut])
+def read_routines(db:Session = Depends(get_db)):
     
+    routines = db.scalars(select(Routine)).all()
 
-    # Create a routine linked to the goal
-    db_routine = Routine(**routine.model_dump(), goal_id = goal_id)
+    return routines
 
-    db.add(db_routine)
+
+# Get routine by id
+@router.get("/{routine_id}", response_model=RoutineOut)
+def read_routine_by_id(routine_id:int, db:Session = Depends(get_db)):
+
+    routine = db.scalar(select(Routine).where(Routine.id == routine_id))
+
+    if routine is None:
+        raise HTTPException(status_code = 404, detail = f"Routine with id : {routine_id} is not found in the database.")
+
+
+    return routine
+
+# Delete routine by id
+@router.delete("/{routine_id}", response_model=RoutineOut)
+def delete_routine_by_id(routine_id:int, db:Session = Depends(get_db)):
+
+    routine = db.scalar(select(Routine).where(Routine.id == routine_id ))
+
+    if routine is None:
+        raise HTTPException(status_code=404, detail = "Routine was not found.")
+
+
+    db.delete(routine)
     db.commit()
-    db.refresh(db_routine)
+    return routine
 
-    return db_routine
+# Create a task for a routine
+@router.post("/{routine_id}/tasks", response_model=TaskOut)
+def create_task(routine_id:int, task:TaskCreate ,db:Session = Depends(get_db)):
+
+    #Check routine exists.
+    routine = db.scalar(select(Routine).where(Routine.id == routine_id))
+
+    if routine is None:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Routine with id: {routine_id} is not found in the database.")
+
+    #Create a task with routine_id
+    db_task = Task(**task.model_dump(), routine_id = routine_id)
+
+    # Save and return.
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+
+    return db_task

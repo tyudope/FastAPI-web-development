@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from app.db.session import get_db
-from app.models import Goal
-from app.schemas import GoalCreate, GoalOut
+from app.models import Goal, Routine
+from app.schemas import GoalCreate, GoalOut, RoutineCreate, RoutineOut
 
-from typing import List
+
 
 
 
@@ -53,6 +53,46 @@ def read_goal_by_id(goal_id:int ,db:Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail = f"Goal with id : {goal_id} is not found in our database. ")
     
     return goal
+
+
+# Delete a goal with the given id
+@router.delete("/{goal_id}", response_model = GoalOut)
+def delete_goal_by_id(goal_id:int, db:Session = Depends(get_db)):
+
+    goal = db.scalar(select(Goal).where(Goal.id == goal_id))
+    if goal is None:
+        raise HTTPException(status_code=404, detail = "Goal not found.")
+
+    db.delete(goal)
+    db.commit()
+    return goal
+
+
+
+# Create routine based on goal.
+@router.post("/{goal_id}/routine", response_model=RoutineOut)
+def create_routine_for_goal(goal_id:int, routine:RoutineCreate, db:Session = Depends(get_db)):
+
+    # Check if the goal exists
+    goal = db.scalar(select(Goal).where(Goal.id == goal_id))
+    if goal is None:
+        raise HTTPException(status_code= 404, detail = "Goal not found.")
+
+    # Check if this goal already has a routine (one-to-one rule)
+    existing_routine = db.scalar(select(Routine).where(Routine.goal_id == goal_id))
+    if existing_routine is not None:
+        raise HTTPException(status_code=400, detail = "The goal already has a routine.")
+    
+
+    # Create a routine linked to the goal
+    db_routine = Routine(**routine.model_dump(), goal_id = goal_id)
+
+    db.add(db_routine)
+    db.commit()
+    db.refresh(db_routine)
+
+    return db_routine
+
 
 
 

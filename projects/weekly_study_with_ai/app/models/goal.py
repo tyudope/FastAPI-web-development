@@ -18,7 +18,8 @@ class Goal(Base):
     title: Mapped[str] = mapped_column(String(50), nullable=False)
     description: Mapped[str] = mapped_column(String(200), nullable=False)
 
-    routine: Mapped[Routine] = relationship(
+    routine: Mapped[Routine] = relationship( 
         "Routine",
-        back_populates="goal"
+        back_populates="goal",
+        cascade = "all, delete-orphan"
     )

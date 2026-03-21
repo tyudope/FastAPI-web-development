@@ -7,29 +7,44 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from app.db.session import get_db
-from app.models import Task, Routine
-from app.schemas import TaskCreate, TaskOut
+from app.models import Task
+from app.schemas import TaskOut
 
 
-router = APIRouter(prefix = "/routines", tags = ["Tasks"])
+router = APIRouter(prefix = "/tasks", tags = ["Tasks"])
 
-@router.post("/{routine_id}/tasks", response_model=TaskOut)
-def create_task(routine_id:int, task:TaskCreate ,db:Session = Depends(get_db)):
 
-    #Check routine exists.
-    routine = db.scalar(select(Routine).where(Routine.id == routine_id))
+# Get task by id 
+@router.get("/{task_id}", response_model=TaskOut)
+def read_task_by_id(task_id:int, db:Session = Depends(get_db)):
 
-    if routine is None:
-        raise HTTPException(
-            status_code=404, 
-            detail=f"Routine with id: {routine_id} is not found in the database.")
+    task = db.scalar(select(Task).where(Task.id == task_id))
+    if task is None:
+        raise  HTTPException(status_code = 404, detail = "Task is not found.")
+    
+    return task
 
-    #Create a task with routine_id
-    db_task = Task(**task.model_dump(), routine_id = routine_id)
+# Get all tasks
+@router.get("", response_model=list[TaskOut])
+def read_tasks(db:Session = Depends(get_db)):
+    
+    tasks = db.scalars(select(Task)).all()
 
-    # Save and return.
-    db.add(db_task)
+    return tasks
+
+
+# Delete task by id
+@router.delete("/{task_id}", response_model=TaskOut)
+def delete_task_by_id(task_id:int, db:Session = Depends(get_db)):
+
+    task = db.scalar(select(Task).where(Task.id == task_id))
+
+    if task is None:
+        raise HTTPException(status_code = 404, detail = "Task is not found.")
+
+    db.delete(task)
     db.commit()
-    db.refresh(db_task)
+    
+    return task
 
-    return db_task
+
