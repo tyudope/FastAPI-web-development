@@ -1,32 +1,71 @@
-## AI Engineering Lab
+# AI Engineering Lab
 
-This repository is a workspace for small AI/ML experiments and mini‑projects. Each project lives under `projects/` and is mostly self‑contained with its own README and run steps.
+A personal workspace for building AI-powered backend projects. Each project explores a specific set of engineering concepts around LLMs, APIs, and data — from structured output and prompt design to ORM integration and service-layer architecture.
 
-## Structure
-- `projects/` — individual projects (APIs, prototypes, notebooks, etc.)
-- `requirements.txt` — top‑level Python tools used across projects
+---
 
-## Current projects
+## Repository Structure
 
-### Uber Meal Recommender
-Meal recommendation API with a minimal UI. It uses SQLite for prior orders and OpenAI for a strict JSON response, then validates against a schema.  
-Folder: [projects/uber_meal_recommender](projects/uber_meal_recommender)  
-README: [projects/uber_meal_recommender/README.md](projects/uber_meal_recommender/README.md)
+```
+ai-engineering-lab/
+├── projects/          # Standalone AI/backend projects
+│   ├── dreamsense/
+│   ├── ai_dj/
+│   ├── uber_meal_recommender/
+│   └── weekly_study_with_ai/
+└── Learning_Phase/    # Chapter exercises and experiments
+```
 
-### AI DJ
-Generates DJ‑ready playlists from a party theme and emotional flow. Includes a small UI, client‑side validation, and schema‑checked API responses.  
-Folder: [projects/ai_dj](projects/ai_dj)  
-README: [projects/ai_dj/README.md](projects/ai_dj/README.md)
+---
 
-### DreamSense
-Dream reflection app focused on safe, structured, non‑diagnostic output. Server‑rendered UI, explicit guardrails, and a schema‑first prompt flow.  
-Folder: [projects/dreamsense](projects/dreamsense)  
-README: [projects/dreamsense/README.md](projects/dreamsense/README.md)
+## Projects
 
-## How to run a project
-1. Go into the project folder.
-2. Follow the project’s README for setup and run instructions.
+| Project | Description | Key Concepts |
+|---|---|---|
+| [DreamSense](projects/dreamsense) | AI dream reflection with structured, safe output | Output contracts, safety guardrails, schema-first design |
+| [AI DJ](projects/ai_dj) | Generates DJ-ready playlists from a theme and emotional flow | Strict schema validation, structured generation |
+| [Uber Meal Recommender](projects/uber_meal_recommender) | Context-aware meal recommendations using order history | Prompt enrichment with DB context, SQLite integration |
+| [Study with AI](projects/weekly_study_with_ai) | Study plan analyzer powered by AI | SQLAlchemy ORM, LLM wrapper pattern, dependency injection |
+
+See [projects/README.md](projects/README.md) for detailed breakdowns of each project.
+
+---
+
+## Tech Stack
+
+All projects are built on a shared foundation:
+
+- **FastAPI** — web framework and API layer
+- **Pydantic v2** — request/response validation and schema enforcement
+- **OpenAI API** — language model integration (`gpt-4.1-mini`)
+- **SQLAlchemy / SQLite** — data persistence where applicable
+- **pydantic-settings** — environment variable management
+
+---
+
+## Running a Project
+
+Each project is self-contained. The general steps are:
+
+```bash
+# 1. Go into the project folder
+cd projects/<project-name>
+
+# 2. Create a .env file with your credentials
+echo "OPENAI_API_KEY=your-key-here" > .env
+
+# 3. Install dependencies
+pip install fastapi uvicorn pydantic pydantic-settings openai sqlalchemy
+
+# 4. Start the server
+uvicorn app.main:app --reload
+```
+
+Refer to each project’s own README for specific setup details and endpoints.
+
+---
 
 ## Notes
-- Keep secrets in `.env` files inside each project and do not commit them.
-- Each project may have its own dependencies and virtual environment.
+
+- `.env` files are gitignored — never commit API keys
+- Each project may have its own virtual environment and dependencies
