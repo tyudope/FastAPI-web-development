@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Night Planner</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --rose:        #d6336c;
+            --rose-dark:   #a61e4d;
+            --rose-soft:   #fce4ec;
+            --plum:        #6741d9;
+            --plum-soft:   #efeafc;
+            --bg-1:        #fff1f2;
+            --bg-2:        #f6e7ff;
+            --surface:     #ffffff;
+            --border:      #f1d6e0;
+            --text:        #2c1a22;
+            --muted:       #8a7480;
+            --ok:          #2f9e44;
+            --radius:      16px;
+            --shadow:      0 10px 30px rgba(166, 30, 77, 0.10);
+            --shadow-sm:   0 2px 8px rgba(166, 30, 77, 0.08);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            background:
+                radial-gradient(1200px 600px at 15% -10%, var(--bg-2), transparent 60%),
+                radial-gradient(1200px 600px at 110% 10%, var(--bg-1), transparent 55%),
+                linear-gradient(180deg, #fff8fb 0%, #fbf2ff 100%);
+            background-attachment: fixed;
+            padding: 0 1rem 4rem;
+        }
+
+        /* ── Header ── */
+        header {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 2.5rem 0 1.5rem;
+            text-align: center;
+        }
+        .brand {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, var(--rose), var(--plum));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .tagline {
+            color: var(--muted);
+            margin-top: 0.4rem;
+            font-size: 0.95rem;
+        }
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 0.9rem;
+            font-size: 0.78rem;
+            color: var(--muted);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 999px;
+            box-shadow: var(--shadow-sm);
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #d1bcc6; transition: background 0.3s;
+        }
+        .status-dot.online { background: var(--ok); box-shadow: 0 0 0 3px rgba(47,158,68,0.15); }
+
+        /* ── Layout ── */
+        main { max-width: 720px; margin: 0 auto; }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.6rem;
+        }
+
+        /* ── Form ── */
+        form { display: grid; gap: 1.15rem; }
+        .row { display: grid; gap: 1.15rem; grid-template-columns: 1fr 1fr; }
+        @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+
+        label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.45rem; }
+        .hint { color: var(--muted); font-weight: 400; }
+
+        select, input[type="number"], input[type="text"], textarea {
+            width: 100%;
+            font: inherit;
+            color: var(--text);
+            background: #fffafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.7rem 0.85rem;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--rose);
+            box-shadow: 0 0 0 3px rgba(214, 51, 108, 0.15);
+        }
+        textarea { resize: vertical; min-height: 70px; }
+
+        /* energy slider */
+        .energy-head { display: flex; justify-content: space-between; align-items: baseline; }
+        .energy-val { font-weight: 700; color: var(--rose-dark); font-size: 0.85rem; }
+        input[type="range"] { width: 100%; accent-color: var(--rose); cursor: pointer; }
+        .scale { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+        .counter { text-align: right; font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+
+        button.submit {
+            font: inherit;
+            font-weight: 700;
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 0.85rem 1.5rem;
+            cursor: pointer;
+            background: linear-gradient(90deg, var(--rose), var(--plum));
+            box-shadow: 0 8px 20px rgba(103, 65, 217, 0.25);
+            transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
+        }
+        button.submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(103, 65, 217, 0.32); }
+        button.submit:active:not(:disabled) { transform: translateY(0); }
+        button.submit:disabled { opacity: 0.6; cursor: progress; }
+
+        /* ── Results ── */
+        #results { margin-top: 1.5rem; display: grid; gap: 1.15rem; }
+        .hidden { display: none !important; }
+
+        .plan {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        .plan-top {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #fff;
+        }
+        .plan.main  .plan-top { background: linear-gradient(90deg, var(--rose), var(--rose-dark)); }
+        .plan.backup .plan-top { background: linear-gradient(90deg, var(--plum), #4b2db5); }
+        .plan-body { padding: 1.2rem; }
+        .plan-title { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em; }
+        .plan-desc { margin-top: 0.5rem; color: #4a3640; line-height: 1.55; }
+        .cost {
+            display: inline-block; margin-top: 0.9rem;
+            font-size: 0.8rem; font-weight: 700;
+            background: var(--rose-soft); color: var(--rose-dark);
+            padding: 4px 12px; border-radius: 999px;
+        }
+        .plan.backup .cost { background: var(--plum-soft); color: var(--plum); }
+
+        .why {
+            background: linear-gradient(180deg, #fff, #fff7fb);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+        }
+        .why h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--rose-dark); }
+        .why p { margin-top: 0.5rem; line-height: 1.6; color: #4a3640; }
+
+        .budget-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.78rem; font-weight: 600;
+            padding: 6px 12px; border-radius: 999px;
+        }
+        .budget-badge.under { background: #ebfbee; color: var(--ok); }
+        .budget-badge.over  { background: #fff0f0; color: #c92a2a; }
+
+        .error {
+            background: #fff0f0; border: 1px solid #ffc9c9; color: #c92a2a;
+            padding: 0.9rem 1.1rem; border-radius: 12px; font-size: 0.9rem;
+        }
+
+        .spinner {
+            display: inline-block; width: 14px; height: 14px; vertical-align: -2px;
+            border: 2px solid rgba(255,255,255,0.5); border-top-color: #fff;
+            border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 7px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        footer { max-width: 720px; margin: 2rem auto 0; text-align: center; color: var(--muted); font-size: 0.78rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">🌙 Date Night Planner</div>
+        <p class="tagline">Tell us the vibe — we'll plan the night, backup included.</p>
+        <div class="status">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">connecting…</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="card">
+            <form id="planForm">
+                <div class="row">
+                    <div>
+                        <label for="theme">Theme</label>
+                        <select id="theme" name="theme">
+                            <option value="cozy">🛋️ Cozy</option>
+                            <option value="romantic">💞 Romantic</option>
+                            <option value="adventure">🧭 Adventure</option>
+                            <option value="comedy">😂 Comedy</option>
+                            <option value="food">🍝 Food</option>
+                            <option value="unique">✨ Unique</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" maxlength="50"
+                               placeholder="e.g. Kraków" required>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="energy-head">
+                        <label for="energy">Energy level</label>
+                        <span class="energy-val" id="energyVal">3 · balanced</span>
+                    </div>
+                    <input type="range" id="energy" name="energy_level" min="1" max="5" value="3" step="1">
+                    <div class="scale"><span>low-key</span><span>high-energy</span></div>
+                </div>
+
+                <div>
+                    <label for="budget">Budget <span class="hint">(PLN)</span></label>
+                    <input type="number" id="budget" name="budget" min="0" value="200" required>
+                </div>
+
+                <div>
+                    <label for="context">Anything else? <span class="hint">(optional)</span></label>
+                    <textarea id="context" name="user_context" maxlength="200"
+                              placeholder="Vegetarian, we love live music, it's our anniversary…"></textarea>
+                    <div class="counter"><span id="ctxCount">0</span>/200</div>
+                </div>
+
+                <button type="submit" class="submit" id="submitBtn">Plan our night 💘</button>
+            </form>
+        </div>
+
+        <div id="results"></div>
+    </main>
+
+    <footer>Powered by Claude · plans are suggestions, double-check opening hours &amp; prices.</footer>
+
+    <script>
+        const ENERGY_LABELS = { 1: "very low-key", 2: "low-key", 3: "balanced", 4: "lively", 5: "high-energy" };
+
+        const form      = document.getElementById("planForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const results   = document.getElementById("results");
+        const energy    = document.getElementById("energy");
+        const energyVal = document.getElementById("energyVal");
+        const context   = document.getElementById("context");
+        const ctxCount  = document.getElementById("ctxCount");
+
+        energy.addEventListener("input", () => {
+            energyVal.textContent = `${energy.value} · ${ENERGY_LABELS[energy.value]}`;
+        });
+        context.addEventListener("input", () => { ctxCount.textContent = context.value.length; });
+
+        // Health check → status dot
+        fetch("/health")
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(() => setStatus(true))
+            .catch(() => setStatus(false));
+
+        function setStatus(online) {
+            document.getElementById("statusDot").classList.toggle("online", online);
+            document.getElementById("statusText").textContent = online ? "ready" : "offline";
+        }
+
+        function esc(s) {
+            const d = document.createElement("div");
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const ctx = context.value.trim();
+            const payload = {
+                theme: document.getElementById("theme").value,
+                energy_level: parseInt(energy.value, 10),
+                budget: parseInt(document.getElementById("budget").value, 10),
+                city: document.getElementById("city").value.trim(),
+                user_context: ctx === "" ? null : ctx,
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span>Planning…';
+            results.innerHTML = "";
+
+            try {
+                const res = await fetch("/date-night", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!res.ok) {
+                    let detail = "Something went wrong. Please try again.";
+                    try { const j = await res.json(); if (j.detail) detail = typeof j.detail === "string" ? j.detail : detail; } catch (_) {}
+                    throw new Error(detail);
+                }
+
+                render(await res.json(), payload.budget);
+            } catch (err) {
+                results.innerHTML = `<div class="error">😬 ${esc(err.message)}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "Plan our night 💘";
+                results.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+        });
+
+        function planCard(kind, badge, idea) {
+            return `
+                <div class="plan ${kind}">
+                    <div class="plan-top">${badge}</div>
+                    <div class="plan-body">
+                        <div class="plan-title">${esc(idea.title)}</div>
+                        <p class="plan-desc">${esc(idea.description)}</p>
+                        <span class="cost">≈ ${idea.estimated_cost} PLN</span>
+                    </div>
+                </div>`;
+        }
+
+        function render(data, budget) {
+            const main = data.main_plan, backup = data.backup_plan;
+            const over = main.estimated_cost > budget;
+            const badge = over
+                ? `<span class="budget-badge over">⚠ over your ${budget} PLN budget</span>`
+                : `<span class="budget-badge under">✓ within your ${budget} PLN budget</span>`;
+
+            results.innerHTML =
+                planCard("main", "Main plan", main) +
+                planCard("backup", "Backup plan", backup) +
+                `<div class="why">
+                    <h3>Why it fits</h3>
+                    <p>${esc(data.why_it_fits)}</p>
+                    <div style="margin-top:0.9rem">${badge}</div>
+                </div>`;
+        }
+    </script>
+</body>
+</html>

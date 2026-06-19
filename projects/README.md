@@ -12,6 +12,7 @@ A collection of AI-powered backend projects built with FastAPI and the OpenAI AP
 | [AI DJ](#ai-dj) | Schema-driven generation, strict validation | FastAPI, OpenAI, Pydantic |
 | [Uber Meal Recommender](#uber-meal-recommender) | Context-aware prompts, SQLite integration | FastAPI, OpenAI, SQLite |
 | [Study with AI](#study-with-ai) | SQLAlchemy ORM, LLM wrapper pattern | FastAPI, OpenAI, SQLAlchemy |
+| [Date Night Planner](#date-night-planner) | Schema-validated Claude output, themed UI | FastAPI, Anthropic Claude, Pydantic |
 
 ---
 
@@ -144,6 +145,38 @@ uvicorn app.main:app --reload
 
 ---
 
+## Date Night Planner
+
+> Turn a theme, energy level, budget, and city into a main + backup date plan.
+
+This project focuses on **schema-validated LLM output with Anthropic Claude** — embedding the response JSON schema in the system prompt, then validating Claude's reply against a strict Pydantic model and surfacing failures as clean API errors.
+
+**Key concepts**
+- Claude integration via a thin, schema-agnostic client wrapper
+- Response contract enforced with `model_validate_json` + graceful `502` on invalid output
+- Defensive parsing (stripping stray code fences from the model reply)
+- Self-contained themed UI served directly from FastAPI
+
+**What it does**
+Takes a theme (cozy, romantic, adventure, comedy, food, unique), an energy level (1–5), a budget in PLN, a city, and optional context. Returns a main plan and a realistic backup plan — each with a title, description, and estimated cost — plus a short note on why it fits.
+
+**Endpoints**
+- `GET /` — browser UI
+- `POST /date-night` — generate a date plan
+- `GET /health` — health check
+
+**Tech stack** — FastAPI · Pydantic v2 · Anthropic Claude (`claude-sonnet-4-6`)
+
+**Run**
+```bash
+cd projects/date_night
+uvicorn app.main:app --reload
+# UI → http://127.0.0.1:8000/
+# Docs → http://127.0.0.1:8000/docs
+```
+
+---
+
 ## Common Setup
 
 All projects use a `.env` file for configuration. At minimum:
@@ -153,14 +186,20 @@ OPENAI_API_KEY=your-openai-api-key
 OPENAI_MODEL=gpt-4.1-mini
 ```
 
+Date Night Planner uses Anthropic Claude instead, so it requires:
+
+```env
+ANTHROPIC_API_KEY=your-anthropic-api-key
+```
+
 Projects that use a database also require:
 
 ```env
 DATABASE_URL=sqlite:///./app.db
 ```
 
-Install dependencies per project:
+Install dependencies from the repo root:
 
 ```bash
-pip install fastapi uvicorn pydantic pydantic-settings openai sqlalchemy
+pip install -r requirements.txt
 ```
