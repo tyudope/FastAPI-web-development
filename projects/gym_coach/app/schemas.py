@@ -54,7 +54,7 @@ class Exercise(StrictModel):
 
 
 class Workout(StrictModel):
-    name:str = Field(..., min_length=2, max_length=25, description = "Name of the workout. (i.e.  PUSH, PULL, UPPER etc..)")
+    name:str = Field(..., min_length=2, max_length=32, description = "Name of the workout. (i.e.  PUSH, PULL, UPPER etc..)")
     exercises:list[Exercise] = Field(..., min_length= 1, max_length=12, description = "List of Exercises")
     day:Weekday = Field(..., description="Day which Workout will be take place.")
     target_experience_level:int = Field(..., ge=1, le= 5,
@@ -63,7 +63,7 @@ class Workout(StrictModel):
 class WorkoutResponse(StrictModel):
     
     workouts:list[Workout] = Field(..., min_length=1, max_length=7, description = "Workout programmes per training day.")
-    reason:str = Field(..., min_length=100, max_length=350, description = "Reason of why this type of program fits to the user's preferences." )
-    pros:str = Field(..., min_length=10, max_length=100, description = "Pros of this workout plan.")
-    cons:str = Field(..., min_length=10, max_length=100, description = "Cons of this workout plan.")
+    reason:str = Field(..., min_length=100, max_length=1000, description = "Reason of why this type of program fits to the user's preferences." )
+    pros:str = Field(..., min_length=10, max_length=400, description = "Pros of this workout plan.")
+    cons:str = Field(..., min_length=10, max_length=400, description = "Cons of this workout plan.")
     

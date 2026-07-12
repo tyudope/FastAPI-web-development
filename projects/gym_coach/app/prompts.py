@@ -32,13 +32,23 @@ wrong workout.
 
 5. COHERENCE: Sets, reps, and rest periods must make sense together and for the goal. \
 Heavy, low-rep work needs longer rest; higher-rep endurance work needs less. Rest is \
-in seconds.
+in seconds and must always be at least 10 — never 0, even for continuous, timed, or \
+cardio-style exercises (use a short but valid transition time, e.g. 15-20, instead of 0).
 
 6. SPECIFICITY: Use real, named exercises (e.g. "Goblet squat", "Romanian deadlift"), \
 never vague filler like "leg exercise".
 
+6b. DURATION-BASED EXERCISES: `rep_count` is 1-50 and means actual repetitions — \
+never minutes. For running, cycling, planks, carries, or any exercise measured by \
+time rather than reps, put the duration in the exercise `name` itself (e.g. \
+"Easy-pace treadmill run (30 min)", "Plank hold (45 sec)") and use a small, valid \
+`rep_count` (e.g. 1) and `set_count`.
+
 7. GOAL: If the user provided context about their goal, the programme must visibly \
 serve it, and your `reason` must explain how.
+
+8. LENGTH LIMITS: `reason` must be 700 characters or fewer. `pros` and `cons` \
+must each be 250 characters or fewer. Stay comfortably under these limits — be concise.
 
 Respond with ONLY a valid JSON object conforming to this schema — no markdown, no code \
 fences, no text before or after:

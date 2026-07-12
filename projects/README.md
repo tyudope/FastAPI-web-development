@@ -13,6 +13,7 @@ A collection of AI-powered backend projects built with FastAPI and the OpenAI AP
 | [Uber Meal Recommender](#uber-meal-recommender) | Context-aware prompts, SQLite integration | FastAPI, OpenAI, SQLite |
 | [Study with AI](#study-with-ai) | SQLAlchemy ORM, LLM wrapper pattern | FastAPI, OpenAI, SQLAlchemy |
 | [Date Night Planner](#date-night-planner) | Schema-validated Claude output, themed UI | FastAPI, Anthropic Claude, Pydantic |
+| [Gym Coach](#gym-coach) | Claude-generated workout programmes, strict field-length contracts | FastAPI, Anthropic Claude, Pydantic |
 
 ---
 
@@ -177,6 +178,47 @@ uvicorn app.main:app --reload
 
 ---
 
+## Gym Coach
+
+> Turn a stats sheet, training days, and a goal into a full Claude-generated workout programme.
+
+This project focuses on **making an LLM's output contract actually stick** — the
+system prompt states field-length limits in plain language *and* the Pydantic
+schema enforces them numerically, truncated replies are detected via `stop_reason`
+instead of being mis-parsed, and a bounded retry absorbs the occasional
+out-of-contract response instead of failing the request outright.
+
+**Key concepts**
+- Claude integration via a thin, schema-agnostic client wrapper
+- Response contract enforced with `model_validate_json` + bounded retry + graceful `502` on repeated failure
+- Prompt-level *and* schema-level length limits, reinforcing each other
+- Truncation detected via `stop_reason` rather than fed to the JSON parser as complete
+- Defensive parsing (stripping stray code fences from the model reply)
+- Self-contained industrial-styled UI served directly from FastAPI
+
+**What it does**
+Takes age, height, weight, sex, training days, preferred location (home/gym/outdoor),
+and an experience level (1–5), plus an optional goal. Returns one workout per
+training day — real, named exercises with sets, reps, and rest — plus a short
+explanation of why the programme fits, and its pros and cons.
+
+**Endpoints**
+- `GET /` — browser UI
+- `POST /workout-plan` — generate a workout programme
+- `GET /health` — health check
+
+**Tech stack** — FastAPI · Pydantic v2 · Anthropic Claude (`claude-sonnet-4-5`)
+
+**Run**
+```bash
+cd projects/gym_coach
+uvicorn app.main:app --reload
+# UI → http://127.0.0.1:8000/
+# Docs → http://127.0.0.1:8000/docs
+```
+
+---
+
 ## Common Setup
 
 All projects use a `.env` file for configuration. At minimum:
@@ -186,7 +228,7 @@ OPENAI_API_KEY=your-openai-api-key
 OPENAI_MODEL=gpt-4.1-mini
 ```
 
-Date Night Planner uses Anthropic Claude instead, so it requires:
+Date Night Planner and Gym Coach use Anthropic Claude instead, so they require:
 
 ```env
 ANTHROPIC_API_KEY=your-anthropic-api-key

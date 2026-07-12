@@ -11,3 +11,5 @@ Review
 .env.*
 *.db
 
+# Claude
+.claude
